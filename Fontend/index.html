@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Product Management System</h1>
+        
+        <div id="productList">
+            <!-- Product list will be displayed here -->
+        </div>
+    
+        <hr>
+    
+        <h2>Add New Product</h2>
+        <form id="addProductForm">
+            <div class="form-group">
+                <label for="productCode">Product Code:</label>
+                <input type="text" id="productCode" name="productCode" required>
+            </div>
+            <div class="form-group">
+                <label for="productName">Product Name:</label>
+                <input type="text" id="productName" name="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="productDate">Product Date:</label>
+                <input type="date" id="productDate" name="productDate" required>
+            </div>
+            <div class="form-group">
+                <label for="productOriginPrice">Product Origin Price:</label>
+                <input type="number" id="productOriginPrice" name="productOriginPrice" required>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required>
+            </div>
+            <div class="form-group">
+                <label for="productStoreCode">Product Store Code:</label>
+                <input type="text" id="productStoreCode" name="productStoreCode" required>
+            </div>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to fetch and display products
+            function fetchProducts() {
+                $.get("/api/products", function (products) {
+                    $("#productList").empty();
+                    products.forEach(function (product) {
+                        $("#productList").append(`<div class="product">${product.productName} - ${product.productStoreCode} <button class="delete" data-id="${product._id}">Delete</button></div>`);
+                    });
+                });
+            }
+
+            // Fetch products when the page loads
+            fetchProducts();
+
+            // Add new product
+            $("#addProductForm").submit(function (event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                $.post("http://localhost:3000/api/products", formData, function (newProduct) {
+                    console.log("New product added:", newProduct);
+                    fetchProducts(); // Refresh product list after adding new product
+                });
+            });
+
+            // Delete product
+            $("#productList").on("click", ".delete", function () {
+                var productId = $(this).data("id");
+                $.ajax({
+                    url: `/api/products/${productId}`,
+                    method: "DELETE",
+                    success: function () {
+                        console.log("Product deleted");
+                        fetchProducts(); // Refresh product list after deleting product
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
